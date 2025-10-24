@@ -1,0 +1,1056 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="data/ZNTPEMBARUANNATUNA_1.js"></script>
+        <script src="data/RANAI_KOTA_2.js"></script>
+        <script src="data/BATU_HITAM_3.js"></script>
+        <script src="data/BANDARSYAH_4.js"></script>
+        <script src="data/RANAI_DARAT_5.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[3.909904360652159,108.33793246390515],[3.9505064057049095,108.40370584994334]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // modify popup if contains media
+        function addClassToPopupIfMedia(content, popup) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var imgTd = tempDiv.querySelector('td img');
+            if (imgTd) {
+                var src = imgTd.getAttribute('src');
+                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() {
+                        popup.update();
+                    }, 10);
+                } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
+                    var audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = src;
+                    imgTd.parentNode.replaceChild(audio, imgTd);
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
+                    var video = document.createElement('video');
+                    video.controls = true;
+                    video.src = src;
+                    video.style.width = "400px";
+                    video.style.height = "300px";
+                    video.style.maxHeight = "60vh";
+                    video.style.maxWidth = "60vw";
+                    imgTd.parentNode.replaceChild(video, imgTd);
+                    popup._contentNode.classList.add('media');
+                    // Aggiorna il popup quando il video carica i metadati
+                    video.addEventListener('loadedmetadata', function() {
+                        popup.update();
+                    });
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else {
+                    popup._contentNode.classList.remove('media');
+                }
+            } else {
+                popup._contentNode.classList.remove('media');
+            }
+        }
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_ZNTPEMBARUANNATUNA_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">DESA_KEL</th>\
+                        <td class="visible-with-data" id="DESA_KEL">' + (feature.properties['DESA_KEL'] !== null ? autolinker.link(String(feature.properties['DESA_KEL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">KECAMATAN</th>\
+                        <td class="visible-with-data" id="KECAMATAN">' + (feature.properties['KECAMATAN'] !== null ? autolinker.link(String(feature.properties['KECAMATAN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NOMOR_ZONA</th>\
+                        <td class="visible-with-data" id="NOMOR_ZONA">' + (feature.properties['NOMOR_ZONA'] !== null ? autolinker.link(String(feature.properties['NOMOR_ZONA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HARGATANAH</th>\
+                        <td class="visible-with-data" id="HARGATANAH">' + (feature.properties['HARGATANAH'] !== null ? autolinker.link(String(feature.properties['HARGATANAH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">LUAS_HA</th>\
+                        <td class="visible-with-data" id="LUAS_HA">' + (feature.properties['LUAS_HA'] !== null ? autolinker.link(String(feature.properties['LUAS_HA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ZNTPEMBARUANNATUNA_1_0(feature) {
+            if (feature.properties['MEAN'] >= 653.240000 && feature.properties['MEAN'] <= 3041.770000 ) {
+                return {
+                pane: 'pane_ZNTPEMBARUANNATUNA_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 3041.770000 && feature.properties['MEAN'] <= 5743.900000 ) {
+                return {
+                pane: 'pane_ZNTPEMBARUANNATUNA_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,188,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 5743.900000 && feature.properties['MEAN'] <= 15456.320000 ) {
+                return {
+                pane: 'pane_ZNTPEMBARUANNATUNA_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,222,118,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 15456.320000 && feature.properties['MEAN'] <= 28378.550000 ) {
+                return {
+                pane: 'pane_ZNTPEMBARUANNATUNA_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(230,244,167,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 28378.550000 && feature.properties['MEAN'] <= 47883.450000 ) {
+                return {
+                pane: 'pane_ZNTPEMBARUANNATUNA_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,232,165,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 47883.450000 && feature.properties['MEAN'] <= 66438.490000 ) {
+                return {
+                pane: 'pane_ZNTPEMBARUANNATUNA_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,186,111,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 66438.490000 && feature.properties['MEAN'] <= 149602.190000 ) {
+                return {
+                pane: 'pane_ZNTPEMBARUANNATUNA_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,110,67,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 149602.190000 && feature.properties['MEAN'] <= 1384255.110000 ) {
+                return {
+                pane: 'pane_ZNTPEMBARUANNATUNA_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_ZNTPEMBARUANNATUNA_1');
+        map.getPane('pane_ZNTPEMBARUANNATUNA_1').style.zIndex = 401;
+        map.getPane('pane_ZNTPEMBARUANNATUNA_1').style['mix-blend-mode'] = 'normal';
+        var layer_ZNTPEMBARUANNATUNA_1 = new L.geoJson(json_ZNTPEMBARUANNATUNA_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ZNTPEMBARUANNATUNA_1',
+            layerName: 'layer_ZNTPEMBARUANNATUNA_1',
+            pane: 'pane_ZNTPEMBARUANNATUNA_1',
+            onEachFeature: pop_ZNTPEMBARUANNATUNA_1,
+            style: style_ZNTPEMBARUANNATUNA_1_0,
+        });
+        bounds_group.addLayer(layer_ZNTPEMBARUANNATUNA_1);
+        map.addLayer(layer_ZNTPEMBARUANNATUNA_1);
+        function pop_RANAI_KOTA_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">NOMOR_ZONA</th>\
+                        <td class="visible-with-data" id="NOMOR_ZONA">' + (feature.properties['NOMOR_ZONA'] !== null ? autolinker.link(String(feature.properties['NOMOR_ZONA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HARGATANAH</th>\
+                        <td class="visible-with-data" id="HARGATANAH">' + (feature.properties['HARGATANAH'] !== null ? autolinker.link(String(feature.properties['HARGATANAH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">LUAS_HA</th>\
+                        <td class="visible-with-data" id="LUAS_HA">' + (feature.properties['LUAS_HA'] !== null ? autolinker.link(String(feature.properties['LUAS_HA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">DESA_KEL</th>\
+                        <td class="visible-with-data" id="DESA_KEL">' + (feature.properties['DESA_KEL'] !== null ? autolinker.link(String(feature.properties['DESA_KEL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">KECAMATAN</th>\
+                        <td class="visible-with-data" id="KECAMATAN">' + (feature.properties['KECAMATAN'] !== null ? autolinker.link(String(feature.properties['KECAMATAN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_RANAI_KOTA_2_0(feature) {
+            if (feature.properties['MEAN'] >= 93378.080000 && feature.properties['MEAN'] <= 280638.181250 ) {
+                return {
+                pane: 'pane_RANAI_KOTA_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 280638.181250 && feature.properties['MEAN'] <= 371523.405000 ) {
+                return {
+                pane: 'pane_RANAI_KOTA_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,188,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 371523.405000 && feature.properties['MEAN'] <= 424718.727500 ) {
+                return {
+                pane: 'pane_RANAI_KOTA_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,222,118,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 424718.727500 && feature.properties['MEAN'] <= 544598.640000 ) {
+                return {
+                pane: 'pane_RANAI_KOTA_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(230,244,167,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 544598.640000 && feature.properties['MEAN'] <= 666615.752500 ) {
+                return {
+                pane: 'pane_RANAI_KOTA_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,232,165,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 666615.752500 && feature.properties['MEAN'] <= 827001.260000 ) {
+                return {
+                pane: 'pane_RANAI_KOTA_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,186,111,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 827001.260000 && feature.properties['MEAN'] <= 994594.298750 ) {
+                return {
+                pane: 'pane_RANAI_KOTA_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,110,67,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 994594.298750 && feature.properties['MEAN'] <= 1812808.220000 ) {
+                return {
+                pane: 'pane_RANAI_KOTA_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_RANAI_KOTA_2');
+        map.getPane('pane_RANAI_KOTA_2').style.zIndex = 402;
+        map.getPane('pane_RANAI_KOTA_2').style['mix-blend-mode'] = 'normal';
+        var layer_RANAI_KOTA_2 = new L.geoJson(json_RANAI_KOTA_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RANAI_KOTA_2',
+            layerName: 'layer_RANAI_KOTA_2',
+            pane: 'pane_RANAI_KOTA_2',
+            onEachFeature: pop_RANAI_KOTA_2,
+            style: style_RANAI_KOTA_2_0,
+        });
+        bounds_group.addLayer(layer_RANAI_KOTA_2);
+        map.addLayer(layer_RANAI_KOTA_2);
+        function pop_BATU_HITAM_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">NOMOR_ZONA</th>\
+                        <td class="visible-with-data" id="NOMOR_ZONA">' + (feature.properties['NOMOR_ZONA'] !== null ? autolinker.link(String(feature.properties['NOMOR_ZONA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HARGATANAH</th>\
+                        <td class="visible-with-data" id="HARGATANAH">' + (feature.properties['HARGATANAH'] !== null ? autolinker.link(String(feature.properties['HARGATANAH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">LUAS_HA</th>\
+                        <td class="visible-with-data" id="LUAS_HA">' + (feature.properties['LUAS_HA'] !== null ? autolinker.link(String(feature.properties['LUAS_HA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">DESA_KEL</th>\
+                        <td class="visible-with-data" id="DESA_KEL">' + (feature.properties['DESA_KEL'] !== null ? autolinker.link(String(feature.properties['DESA_KEL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">KECAMATAN</th>\
+                        <td class="visible-with-data" id="KECAMATAN">' + (feature.properties['KECAMATAN'] !== null ? autolinker.link(String(feature.properties['KECAMATAN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_BATU_HITAM_3_0(feature) {
+            if (feature.properties['MEAN'] >= 189600.000000 && feature.properties['MEAN'] <= 239079.682500 ) {
+                return {
+                pane: 'pane_BATU_HITAM_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 239079.682500 && feature.properties['MEAN'] <= 339773.395000 ) {
+                return {
+                pane: 'pane_BATU_HITAM_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,188,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 339773.395000 && feature.properties['MEAN'] <= 373913.815000 ) {
+                return {
+                pane: 'pane_BATU_HITAM_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,222,118,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 373913.815000 && feature.properties['MEAN'] <= 406775.070000 ) {
+                return {
+                pane: 'pane_BATU_HITAM_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(230,244,167,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 406775.070000 && feature.properties['MEAN'] <= 447724.005000 ) {
+                return {
+                pane: 'pane_BATU_HITAM_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,232,165,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 447724.005000 && feature.properties['MEAN'] <= 519080.040000 ) {
+                return {
+                pane: 'pane_BATU_HITAM_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,186,111,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 519080.040000 && feature.properties['MEAN'] <= 651237.590000 ) {
+                return {
+                pane: 'pane_BATU_HITAM_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,110,67,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 651237.590000 && feature.properties['MEAN'] <= 1307953.480000 ) {
+                return {
+                pane: 'pane_BATU_HITAM_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_BATU_HITAM_3');
+        map.getPane('pane_BATU_HITAM_3').style.zIndex = 403;
+        map.getPane('pane_BATU_HITAM_3').style['mix-blend-mode'] = 'normal';
+        var layer_BATU_HITAM_3 = new L.geoJson(json_BATU_HITAM_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BATU_HITAM_3',
+            layerName: 'layer_BATU_HITAM_3',
+            pane: 'pane_BATU_HITAM_3',
+            onEachFeature: pop_BATU_HITAM_3,
+            style: style_BATU_HITAM_3_0,
+        });
+        bounds_group.addLayer(layer_BATU_HITAM_3);
+        map.addLayer(layer_BATU_HITAM_3);
+        function pop_BANDARSYAH_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">NOMOR_ZONA</th>\
+                        <td class="visible-with-data" id="NOMOR_ZONA">' + (feature.properties['NOMOR_ZONA'] !== null ? autolinker.link(String(feature.properties['NOMOR_ZONA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HARGATANAH</th>\
+                        <td class="visible-with-data" id="HARGATANAH">' + (feature.properties['HARGATANAH'] !== null ? autolinker.link(String(feature.properties['HARGATANAH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">LUAS_HA</th>\
+                        <td class="visible-with-data" id="LUAS_HA">' + (feature.properties['LUAS_HA'] !== null ? autolinker.link(String(feature.properties['LUAS_HA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">DESA_KEL</th>\
+                        <td class="visible-with-data" id="DESA_KEL">' + (feature.properties['DESA_KEL'] !== null ? autolinker.link(String(feature.properties['DESA_KEL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">KECAMATAN</th>\
+                        <td class="visible-with-data" id="KECAMATAN">' + (feature.properties['KECAMATAN'] !== null ? autolinker.link(String(feature.properties['KECAMATAN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_BANDARSYAH_4_0(feature) {
+            if (feature.properties['MEAN'] >= 9565.900000 && feature.properties['MEAN'] <= 62256.337500 ) {
+                return {
+                pane: 'pane_BANDARSYAH_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 62256.337500 && feature.properties['MEAN'] <= 99267.277500 ) {
+                return {
+                pane: 'pane_BANDARSYAH_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,188,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 99267.277500 && feature.properties['MEAN'] <= 140859.166250 ) {
+                return {
+                pane: 'pane_BANDARSYAH_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,222,118,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 140859.166250 && feature.properties['MEAN'] <= 164661.065000 ) {
+                return {
+                pane: 'pane_BANDARSYAH_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(230,244,167,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 164661.065000 && feature.properties['MEAN'] <= 189946.238750 ) {
+                return {
+                pane: 'pane_BANDARSYAH_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,232,165,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 189946.238750 && feature.properties['MEAN'] <= 227854.917500 ) {
+                return {
+                pane: 'pane_BANDARSYAH_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,186,111,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 227854.917500 && feature.properties['MEAN'] <= 269715.591250 ) {
+                return {
+                pane: 'pane_BANDARSYAH_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,110,67,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 269715.591250 && feature.properties['MEAN'] <= 434973.770000 ) {
+                return {
+                pane: 'pane_BANDARSYAH_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_BANDARSYAH_4');
+        map.getPane('pane_BANDARSYAH_4').style.zIndex = 404;
+        map.getPane('pane_BANDARSYAH_4').style['mix-blend-mode'] = 'normal';
+        var layer_BANDARSYAH_4 = new L.geoJson(json_BANDARSYAH_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BANDARSYAH_4',
+            layerName: 'layer_BANDARSYAH_4',
+            pane: 'pane_BANDARSYAH_4',
+            onEachFeature: pop_BANDARSYAH_4,
+            style: style_BANDARSYAH_4_0,
+        });
+        bounds_group.addLayer(layer_BANDARSYAH_4);
+        map.addLayer(layer_BANDARSYAH_4);
+        function pop_RANAI_DARAT_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">NOMOR_ZONA</th>\
+                        <td class="visible-with-data" id="NOMOR_ZONA">' + (feature.properties['NOMOR_ZONA'] !== null ? autolinker.link(String(feature.properties['NOMOR_ZONA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HARGATANAH</th>\
+                        <td class="visible-with-data" id="HARGATANAH">' + (feature.properties['HARGATANAH'] !== null ? autolinker.link(String(feature.properties['HARGATANAH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">LUAS_HA</th>\
+                        <td class="visible-with-data" id="LUAS_HA">' + (feature.properties['LUAS_HA'] !== null ? autolinker.link(String(feature.properties['LUAS_HA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">DESA_KEL</th>\
+                        <td class="visible-with-data" id="DESA_KEL">' + (feature.properties['DESA_KEL'] !== null ? autolinker.link(String(feature.properties['DESA_KEL']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">KECAMATAN</th>\
+                        <td class="visible-with-data" id="KECAMATAN">' + (feature.properties['KECAMATAN'] !== null ? autolinker.link(String(feature.properties['KECAMATAN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_RANAI_DARAT_5_0(feature) {
+            if (feature.properties['MEAN'] >= 36290.460000 && feature.properties['MEAN'] <= 72652.362500 ) {
+                return {
+                pane: 'pane_RANAI_DARAT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 72652.362500 && feature.properties['MEAN'] <= 94726.277500 ) {
+                return {
+                pane: 'pane_RANAI_DARAT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,188,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 94726.277500 && feature.properties['MEAN'] <= 124266.460000 ) {
+                return {
+                pane: 'pane_RANAI_DARAT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,222,118,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 124266.460000 && feature.properties['MEAN'] <= 170602.655000 ) {
+                return {
+                pane: 'pane_RANAI_DARAT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(230,244,167,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 170602.655000 && feature.properties['MEAN'] <= 199698.523750 ) {
+                return {
+                pane: 'pane_RANAI_DARAT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,232,165,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 199698.523750 && feature.properties['MEAN'] <= 235502.882500 ) {
+                return {
+                pane: 'pane_RANAI_DARAT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,186,111,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 235502.882500 && feature.properties['MEAN'] <= 279986.266250 ) {
+                return {
+                pane: 'pane_RANAI_DARAT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,110,67,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['MEAN'] >= 279986.266250 && feature.properties['MEAN'] <= 831561.340000 ) {
+                return {
+                pane: 'pane_RANAI_DARAT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_RANAI_DARAT_5');
+        map.getPane('pane_RANAI_DARAT_5').style.zIndex = 405;
+        map.getPane('pane_RANAI_DARAT_5').style['mix-blend-mode'] = 'normal';
+        var layer_RANAI_DARAT_5 = new L.geoJson(json_RANAI_DARAT_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RANAI_DARAT_5',
+            layerName: 'layer_RANAI_DARAT_5',
+            pane: 'pane_RANAI_DARAT_5',
+            onEachFeature: pop_RANAI_DARAT_5,
+            style: style_RANAI_DARAT_5_0,
+        });
+        bounds_group.addLayer(layer_RANAI_DARAT_5);
+        map.addLayer(layer_RANAI_DARAT_5);
+        setBounds();
+        </script>        
+    
+
+
+<!-- Tambahan kontrol layer dan pelacakan lokasi seperti Google Maps -->
+<script>
+    // === Kontrol Pilihan Layer ===
+    var baseMaps = {
+        "Google Satellite": layer_GoogleSatellite_0
+    };
+
+    var overlayMaps = {
+        "ZNT Pembaruan Natuna": layer_ZNTPEMBARUANNATUNA_1,
+        "Ranai Kota": layer_RANAI_KOTA_2,
+        "Batu Hitam": layer_BATU_HITAM_3,
+        "Bandarsyah": layer_BANDARSYAH_4,
+        "Ranai Darat": layer_RANAI_DARAT_5
+    };
+
+    L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
+
+    // === Pelacakan Lokasi Realtime seperti Google Maps ===
+    var userMarker, accuracyCircle, watchID;
+
+    function startTracking() {
+        if (!navigator.geolocation) {
+            alert("Browser Anda tidak mendukung pelacakan lokasi.");
+            return;
+        }
+
+        watchID = navigator.geolocation.watchPosition(
+            function (position) {
+                var lat = position.coords.latitude;
+                var lon = position.coords.longitude;
+                var accuracy = position.coords.accuracy;
+
+                if (userMarker) {
+                    userMarker.setLatLng([lat, lon]);
+                    accuracyCircle.setLatLng([lat, lon]).setRadius(accuracy);
+                } else {
+                    userMarker = L.marker([lat, lon], {icon: L.icon({
+                        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32],
+                        popupAnchor: [0, -30]
+                    })}).addTo(map)
+                    .bindPopup("<b>Lokasi Anda</b><br>Lat: " + lat.toFixed(5) + ", Lon: " + lon.toFixed(5))
+                    .openPopup();
+
+                    accuracyCircle = L.circle([lat, lon], {
+                        radius: accuracy,
+                        color: '#136AEC',
+                        fillColor: '#136AEC',
+                        fillOpacity: 0.2
+                    }).addTo(map);
+
+                    map.setView([lat, lon], 16);
+                }
+            },
+            function (error) {
+                alert("Gagal mendapatkan lokasi: " + error.message);
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 10000,
+                timeout: 10000
+            }
+        );
+    }
+
+    function stopTracking() {
+        if (watchID) {
+            navigator.geolocation.clearWatch(watchID);
+            watchID = null;
+            if (userMarker) map.removeLayer(userMarker);
+            if (accuracyCircle) map.removeLayer(accuracyCircle);
+            alert("Pelacakan lokasi dihentikan.");
+        }
+    }
+
+    // Tambahkan tombol toggle pelacakan
+    L.easyButton('fa-location-arrow', function(btn, map){
+        if (watchID) {
+            stopTracking();
+            btn.button.style.backgroundColor = '';
+        } else {
+            startTracking();
+            btn.button.style.backgroundColor = '#00b894';
+        }
+    }, 'Aktifkan/Nonaktifkan Pelacakan Lokasi').addTo(map);
+</script>
+
+</body>
+</html>
